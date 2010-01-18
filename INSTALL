@@ -1,234 +1,247 @@
-Installation Instructions
-*************************
+Vala Installation Instructions
+==============================
+Michael Wild <themiwi@users.sourceforge.net>
+:Author Initials: MW
+:version: 0.8.0
+v{version}, {localdate}
+http://live.gnome.org/Vala
 
-Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005,
-2006 Free Software Foundation, Inc.
+Prerequisites
+-------------
+Required
+~~~~~~~~
+* http://gtk.org[GLib] version 2.14.0 or newer (with development headers).
+* A ANSI-C (C89) compliant C-compiler, e.g. http://gcc.gnu.org[GCC].
+* http://cmake.org[CMake] version 2.8 or newer.
 
-This file is free documentation; the Free Software Foundation gives
-unlimited permission to copy, distribute and modify it.
+Optional
+~~~~~~~~
+* A http://live.gnome.org/Vala[Vala] compiler version 0.7.0 or newer if you
+  want to compile a development version not containing the precompiled sources.
+* The lexical analyzer http://flex.sourceforge.net[flex] if you obtained a
+  development version of Vala not containing the precompiled sources and want
+  to build the tools 'vapigen' and 'vapicheck'.
+* The parser generator http://gnu.org/software/bison[Bison] if you obtained a
+  development version of Vala not containing the precompiled sources and want
+  to build the tools 'vapigen' and 'vapicheck'.
+* To build the HTML documentation from the XML sources,
+  http://xmlsoft.org/XSLT/xsltproc2.html[xsltproc] is required. Released
+  versions of Vala already contain the processed documentation, and 'xsltproc'
+  is not required.
+* http://dbus.freedesktop.org[DBus] with the 'GLib' bindings is required to
+  build the test-suite.
+* To perform some maintenance tasks, you need to have the
+  http://perl.org[perl] interpreter installed.
 
-Basic Installation
-==================
+Building and Installing Vala on UNIX-like systems (including Mac OS X)
+----------------------------------------------------------------------
+- Download the Vala sources from the
+  http://git.wildcodes.com/cgit.git/vala.git[Git repository] to somewhere
+  convenient. For the further instructions we will use
+  +$HOME/Source/vala-{version}+ as the directory containing the sources. You
+  can use both, a checkout from the repository or a current snapshot.
+- Create a build tree and _cd_ into it:
++
+---------------
+$ mkdir $HOME/Source/vala-build
+$ cd $HOME/Source/vala-build
+---------------
+- Start the CMake-configuration:
++
+---------------
+$ ccmake $HOME/Source/vala-{version}
+---------------
+- Press the +c+ key to initialize the cache.
+- Use the arrow keys to navigate up and down and press +enter+ to edit a field.
+  To commit the change, press +enter+ again, or +ESC+ to abandon the change.
+  *ON/OFF* fields are toggled by pressing +enter+. Advanced options can be
+  displayed by hitting the +t+ key. Important settings are:
+  +CMAKE_INSTALL_PREFIX+::
+    The install path prefix, prepended to relative installation directories.
+  +CMAKE_BUILD_TYPE+::
+    The build type. Available options are '<unset>' ( i.e. not set) for a build
+    without special compiler flags, 'Release' for optimized builds, 'Debug' if
+    you need to debug Vala, 'RelWithDebInfo' for optimized builds with debug
+    information and 'MinSizeRel' for size-optimized builds.
+  +VALA_ENABLE_VAPIGEN+::
+    Also build and install 'vapigen' and 'vapicheck'.
+  +
+  Refer to the <<config-reference, Build Configuration Reference>> for all the
+  available options.
+- Keep pressing +c+ until _ccmake_ displays "++Press [g] to generate and
+  exit++" in the legend at the bottom of the interface.
+- Press +g+ to generate the Makefiles and exit _ccmake_.
+- Start the native build tool. E.g. if using the 'GNU Makefile' generator, type
++
+---------------
+$ make
+---------------
++
+If you don't know how to start the native build tool, you can also use
++
+---------------
+$ cmake --build .
+---------------
+- If the build finished without errors, install Vala by running the +install+
+  target. Again, you can do so by typing (depending on the installation paths
+  you may need root/Administrator privileges to do this):
++
+---------------
+$ cmake --build . --target install
+---------------
 
-Briefly, the shell commands `./configure; make; make install' should
-configure, build, and install this package.  The following
-more-detailed instructions are generic; see the `README' file for
-instructions specific to this package.
+Building and Installing Vala on Windows
+---------------------------------------
+There are many options for compiling Vala on Windows. If you want to use
+http://cygwin.org[Cygwin] or http://mingw.org[MinGW] to compile Vala, you can
+follow the instruction for <<build-unix, UNIX-like>> systems. If you want to
+build using http://microsoft.com/visualstudio[Microsoft Visual Studio] (or some
+other IDE supported by CMake) instead, use below instructions.
 
-   The `configure' shell script attempts to guess correct values for
-various system-dependent variables used during compilation.  It uses
-those values to create a `Makefile' in each directory of the package.
-It may also create one or more `.h' files containing system-dependent
-definitions.  Finally, it creates a shell script `config.status' that
-you can run in the future to recreate the current configuration, and a
-file `config.log' containing compiler output (useful mainly for
-debugging `configure').
+- Download the Vala sources from the
+  http://git.wildcodes.com/cgit.git/vala.git[Git repository] to somewhere
+  convenient. For the further instructions we will use
+  +%HOMEPATH%\Source\vala-{version}+ as the folder containing the sources. You
+  can use both, a checkout from the repository or a current snapshot.
+- Create the folder which is different from the source folder. We will use
+  +%HOMEPATH%\Source\vala-build+ in the following.
+- Start the program 'CMake GUI' from the 'Start' menu.
+- Use the 'Browse Source...' button to locate the source-folder
+  (+%HOMEPATH%\Source\vala-{version}+) or enter it in the text field to its
+  left.
+- Use the 'Browse Build...' button to locate the build-folder
+  (+%HOMEPATH%\Source\vala-build+) or enter it in the text field to its left.
+- Press the 'Configure' button to initialize the cache. From the dialog that pops
+  up, select the appropriate generator and options.
+- Edit the build options to suit your needs. Some important settings are:
+  +CMAKE_INSTALL_PREFIX+::
+    The install path prefix, prepended to relative installation directories.
+  +CMAKE_BUILD_TYPE+::
+    The build type. Available options are '<unset>' ( i.e. not set) for a build
+    without special compiler flags, 'Release' for optimized builds, 'Debug' if
+    you need to debug Vala, 'RelWithDebInfo' for optimized builds with debug
+    information and 'MinSizeRel' for size-optimized builds.
+  +VALA_ENABLE_VAPIGEN+::
+    Also build and install 'vapigen' and 'vapicheck'.
+  +
+  Refer to the <<config-reference, Build Configuration Reference>> for all the
+  available options.
+- Keep pressing the 'Configure' button until all of the red entries are gone
+  and the button labelled 'Generate' is enabled.
+- Press the 'Generate' button to generate the build system.
+- Navigate to the build directory (+%HOMEPATH%\Source\vala-build+) and open the
+  generated project file with your IDE (e.g. Visual Studio).
+- Run the target +ALL_BUILD+ to build Vala.
+- If the build finished without errors, install Vala by running the +install+
+  target.
 
-   It can also use an optional file (typically called `config.cache'
-and enabled with `--cache-file=config.cache' or simply `-C') that saves
-the results of its tests to speed up reconfiguring.  Caching is
-disabled by default to prevent problems with accidental use of stale
-cache files.
+[[config-reference]]
+Build Configuration Reference
+-----------------------------
+The following lists variables that affect how Vala is built and where it is
+installed. Depending on these choices, CMake will try to locate the
+dependencies (libraries, include-directories and executables) and generate
+corresponding cache entries that can be edited if CMake failed to find a
+component or one whishes to specify an alternative. Also, some of the below
+options only become available if either some prerequisits are found on the
+system or some other feature is enabled.
+[glossary]
++CMAKE_BUILD_TYPE+::
+  One of '<empty>', 'Debug', 'Release', 'RelWithDebInfo' and 'MinSizeRel'.
+  Refer to the CMake documentation for more detail. In order to do coverage
+  analysis, use the option 'Coverage'. The latter is only available if
+  compiling with the http://gcc.gnu.org[GCC] compiler.
++CMAKE_INSTALL_PREFIX+::
+  Installation prefix which is prepended to relative (i.e. not absolute)
+  installation directories.
++VALA_BIN_DIR+::
+  Installation directory for executables and other runtime components (DLLs on
+  Windows).
++VALA_LIB_DIR+::
+  Installation directory for libraries (*not* DLLs on Windows).
++VALA_INC_DIR+::
+  Location to install development headers in.
++VALA_DATA_DIR+::
+  Directory to under which architecture-independent data files are to be
+  installed.
++VALA_MAN_DIR+::
+  Installation directory under which to install the Unix manual pages.
++VALA_ENABLE_VAPIGEN+::
+  Build and install the tools 'vapigen' and 'vapicheck'.
++VALA_USE_SYSTEM_COMPILER+::
+  If CMake was able to find another Vala compiler on your system you can use
+  it to compile Vala. If you obtained Vala from the Git repository or use a
+  snapshot that does not contain the precompiled sources, you *must* have a
+  Vala compiler installed.
++VALA_USE_XSLTPROC+::
+  If CMake was able to find 'xsltproc' on your system you can use it to compile
+  the documentation. If you obtained Vala from the Git repository or use a
+  snapshot that does not contain the precompiled sources, you *must* have
+  'xsltproc' installed in order for the documentation to be built and
+  installed.
++VALA_USE_FLEX_AND_BISON+::
+  If CMake was able to find 'flex' and 'Bison' on your system you can use them
+  to compile the lexer and parser for the tools 'vapigen' and 'vapicheck' if
+  you enabled +VALA_ENABLE_VAPIGEN+. If you obtained Vala from the Git
+  repository or use a snapshot that does not contain the precompiled sources,
+  you *must* have 'flex' and 'bison' installed in order to build 'vapigen' and
+  'vapicheck'.
++VALA_COMPILE_FLAGS+:;
+  Flags used by the Vala compiler.
++VALA_COMPILE_FLAGS_<CONFIG>+::
+  Flags used by the Vala compiler for the build type '<CONFIG>'. These are
+  appended to +VALA_COMPILE_FLAGS+.
++VALA_ENABLE_RECOMPILE+::
+  If enabled the, compiler is either bootstrapped from the C sources or using
+  an external Vala compiler (+VALA_USE_SYSTEM_COMPILER+) which is then used to
+  recompile the final Vala compiler.
++VALA_ENABLE_TESTING+::
+  Build the unit-testing applications.
++VALA_ENABLE_MAINTAINER_MODE+::
+  Enable special targets useful for the maintenance Vala itself.
++
+[WARNING]
+__Only enable this setting if you know what you are doing.__ The targets
++gen-ChangeLog+, +gen-version+ and +self-contained+ made available by this
+setting **modify the source tree**.
 
-   If you need to do unusual things to compile the package, please try
-to figure out how `configure' could check whether to do them, and mail
-diffs or instructions to the address given in the `README' so they can
-be considered for the next release.  If you are using the cache, and at
-some point `config.cache' contains results you don't want to keep, you
-may remove or edit it.
+[[special-targets]]
+Special Targets
+---------------
+[glossary]
++test+::
+  Run the unit tests. Requires +VALA_ENABLE_TESTING+ to be enabled.
++
+[IMPORTANT]
+Some of the tests require you to have a DBus daemon running in order for them
+to work. Currently the daemon is *not* started automatically.
 
-   The file `configure.ac' (or `configure.in') is used to create
-`configure' by a program called `autoconf'.  You need `configure.ac' if
-you want to change it or regenerate `configure' using a newer version
-of `autoconf'.
++check+::
+  Configure, build, run unit tests and perform coverage analysis (requires to
+  be compiled for _gcov_, e.g. using the 'Coverage' build configuration). Only
+  available if +VALA_ENABLE_TESTING+ is enabled. Again, a DBus daemon must be
+  running for some of the tests to work.
 
-The simplest way to compile this package is:
++self-contained+::
+  Copy the generated files (C-sources, headers, '.vapi' files etc.) into the
+  source tree. The resulting source tree is self-contained and can be
+  bootstrapped without an external Vala compiler. Only available if
+  +VALA_ENABLE_MAINTAINER_MODE+ is enabled.
 
-  1. `cd' to the directory containing the package's source code and type
-     `./configure' to configure the package for your system.
++gen-ChangeLog+::
+  Automatically generate the 'ChangeLog' file from the 'git' revision log.
+  Requires the source tree to be a 'git' checkout and
+  +VALA_ENABLE_MAINTAINER_MODE+ to be enabled.
 
-     Running `configure' might take a while.  While running, it prints
-     some messages telling which features it is checking for.
++gen-version+::
+  Create the '.version' file from the 'git' revision log. Requries the source
+  tree to be a 'git' checkout and +VALA_ENABLE_MAINTAINERMODE+ to be enabled.
+  The '.version' file is used by CMake to determine the package version if no
+  'git' information is available (e.g. in a source distribution).
 
-  2. Type `make' to compile the package.
+////////////////////////////////////////////////////////
+Process with: asciidoc
 
-  3. Optionally, type `make check' to run any self-tests that come with
-     the package.
-
-  4. Type `make install' to install the programs and any data files and
-     documentation.
-
-  5. You can remove the program binaries and object files from the
-     source code directory by typing `make clean'.  To also remove the
-     files that `configure' created (so you can compile the package for
-     a different kind of computer), type `make distclean'.  There is
-     also a `make maintainer-clean' target, but that is intended mainly
-     for the package's developers.  If you use it, you may have to get
-     all sorts of other programs in order to regenerate files that came
-     with the distribution.
-
-Compilers and Options
-=====================
-
-Some systems require unusual options for compilation or linking that the
-`configure' script does not know about.  Run `./configure --help' for
-details on some of the pertinent environment variables.
-
-   You can give `configure' initial values for configuration parameters
-by setting variables in the command line or in the environment.  Here
-is an example:
-
-     ./configure CC=c99 CFLAGS=-g LIBS=-lposix
-
-   *Note Defining Variables::, for more details.
-
-Compiling For Multiple Architectures
-====================================
-
-You can compile the package for more than one kind of computer at the
-same time, by placing the object files for each architecture in their
-own directory.  To do this, you can use GNU `make'.  `cd' to the
-directory where you want the object files and executables to go and run
-the `configure' script.  `configure' automatically checks for the
-source code in the directory that `configure' is in and in `..'.
-
-   With a non-GNU `make', it is safer to compile the package for one
-architecture at a time in the source code directory.  After you have
-installed the package for one architecture, use `make distclean' before
-reconfiguring for another architecture.
-
-Installation Names
-==================
-
-By default, `make install' installs the package's commands under
-`/usr/local/bin', include files under `/usr/local/include', etc.  You
-can specify an installation prefix other than `/usr/local' by giving
-`configure' the option `--prefix=PREFIX'.
-
-   You can specify separate installation prefixes for
-architecture-specific files and architecture-independent files.  If you
-pass the option `--exec-prefix=PREFIX' to `configure', the package uses
-PREFIX as the prefix for installing programs and libraries.
-Documentation and other data files still use the regular prefix.
-
-   In addition, if you use an unusual directory layout you can give
-options like `--bindir=DIR' to specify different values for particular
-kinds of files.  Run `configure --help' for a list of the directories
-you can set and what kinds of files go in them.
-
-   If the package supports it, you can cause programs to be installed
-with an extra prefix or suffix on their names by giving `configure' the
-option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
-
-Optional Features
-=================
-
-Some packages pay attention to `--enable-FEATURE' options to
-`configure', where FEATURE indicates an optional part of the package.
-They may also pay attention to `--with-PACKAGE' options, where PACKAGE
-is something like `gnu-as' or `x' (for the X Window System).  The
-`README' should mention any `--enable-' and `--with-' options that the
-package recognizes.
-
-   For packages that use the X Window System, `configure' can usually
-find the X include and library files automatically, but if it doesn't,
-you can use the `configure' options `--x-includes=DIR' and
-`--x-libraries=DIR' to specify their locations.
-
-Specifying the System Type
-==========================
-
-There may be some features `configure' cannot figure out automatically,
-but needs to determine by the type of machine the package will run on.
-Usually, assuming the package is built to be run on the _same_
-architectures, `configure' can figure that out, but if it prints a
-message saying it cannot guess the machine type, give it the
-`--build=TYPE' option.  TYPE can either be a short name for the system
-type, such as `sun4', or a canonical name which has the form:
-
-     CPU-COMPANY-SYSTEM
-
-where SYSTEM can have one of these forms:
-
-     OS KERNEL-OS
-
-   See the file `config.sub' for the possible values of each field.  If
-`config.sub' isn't included in this package, then this package doesn't
-need to know the machine type.
-
-   If you are _building_ compiler tools for cross-compiling, you should
-use the option `--target=TYPE' to select the type of system they will
-produce code for.
-
-   If you want to _use_ a cross compiler, that generates code for a
-platform different from the build platform, you should specify the
-"host" platform (i.e., that on which the generated programs will
-eventually be run) with `--host=TYPE'.
-
-Sharing Defaults
-================
-
-If you want to set default values for `configure' scripts to share, you
-can create a site shell script called `config.site' that gives default
-values for variables like `CC', `cache_file', and `prefix'.
-`configure' looks for `PREFIX/share/config.site' if it exists, then
-`PREFIX/etc/config.site' if it exists.  Or, you can set the
-`CONFIG_SITE' environment variable to the location of the site script.
-A warning: not all `configure' scripts look for a site script.
-
-Defining Variables
-==================
-
-Variables not defined in a site shell script can be set in the
-environment passed to `configure'.  However, some packages may run
-configure again during the build, and the customized values of these
-variables may be lost.  In order to avoid this problem, you should set
-them in the `configure' command line, using `VAR=value'.  For example:
-
-     ./configure CC=/usr/local2/bin/gcc
-
-causes the specified `gcc' to be used as the C compiler (unless it is
-overridden in the site shell script).
-
-Unfortunately, this technique does not work for `CONFIG_SHELL' due to
-an Autoconf bug.  Until the bug is fixed you can use this workaround:
-
-     CONFIG_SHELL=/bin/bash /bin/bash ./configure CONFIG_SHELL=/bin/bash
-
-`configure' Invocation
-======================
-
-`configure' recognizes the following options to control how it operates.
-
-`--help'
-`-h'
-     Print a summary of the options to `configure', and exit.
-
-`--version'
-`-V'
-     Print the version of Autoconf used to generate the `configure'
-     script, and exit.
-
-`--cache-file=FILE'
-     Enable the cache: use and save the results of the tests in FILE,
-     traditionally `config.cache'.  FILE defaults to `/dev/null' to
-     disable caching.
-
-`--config-cache'
-`-C'
-     Alias for `--cache-file=config.cache'.
-
-`--quiet'
-`--silent'
-`-q'
-     Do not print messages saying which checks are being made.  To
-     suppress all normal output, redirect it to `/dev/null' (any error
-     messages will still be shown).
-
-`--srcdir=DIR'
-     Look for the package's source code in directory DIR.  Usually
-     `configure' can determine that directory automatically.
-
-`configure' also accepts some other, not widely useful, options.  Run
-`configure --help' for more details.
-
+Vim users, this is for you:
+vim: ft=asciidoc sw=2 expandtab fenc=utf-8
+////////////////////////////////////////////////////////
