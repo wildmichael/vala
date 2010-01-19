@@ -311,21 +311,31 @@ public class Vala.CodeContext {
 	}
 
 	public string? get_package_path (string pkg, string[] directories) {
-		var path = get_file_path (pkg + ".vapi", "vala/vapi", directories);
+		/* try the user-provided vapi dirs */
+		var path = get_file_path (pkg + ".vapi", "", directories);
 
 		if (path == null) {
-			/* last chance: try the package compiled-in vapi dir */
+			/* try the package compiled-in vapi dir */
 			var filename = Path.build_filename (Config.PACKAGE_DATADIR, "vapi", pkg + ".vapi");
 			if (FileUtils.test (filename, FileTest.EXISTS)) {
 				path = filename;
 			}
 		}
 
+		if (path == null) {
+			/* try the system data dir */
+			path = get_file_path (pkg + ".vapi", "vala/vapi", Environment.get_system_data_dirs ());
+		}
+
 		return path;
 	}
 
 	public string? get_gir_path (string gir, string[] directories) {
-		return get_file_path (gir + ".gir", "gir-1.0", directories);
+		var path = get_file_path (gir + ".gir", "", directories);
+		if(path == null) {
+			path = get_file_path (gir + ".gir", "gir-1.0", Environment.get_system_data_dirs ());
+		}
+		return path;
 	}
 
 	string? get_file_path (string basename, string data_dir, string[] directories) {
@@ -333,17 +343,10 @@ public class Vala.CodeContext {
 
 		if (directories != null) {
 			foreach (string dir in directories) {
-				filename = Path.build_filename (dir, basename);
+				filename = Path.build_filename (dir, data_dir, basename);
 				if (FileUtils.test (filename, FileTest.EXISTS)) {
 					return filename;
 				}
-			}
-		}
-
-		foreach (string dir in Environment.get_system_data_dirs ()) {
-			filename = Path.build_filename (dir, data_dir, basename);
-			if (FileUtils.test (filename, FileTest.EXISTS)) {
-				return filename;
 			}
 		}
 
