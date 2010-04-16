@@ -1,0 +1,12 @@
+set(VALAGEE_VALA_SOURCES
+  "${CMAKE_SOURCE_DIR}/gee/arraylist.vala"
+  "${CMAKE_SOURCE_DIR}/gee/collection.vala"
+  "${CMAKE_SOURCE_DIR}/gee/collectionobject.vala"
+  "${CMAKE_SOURCE_DIR}/gee/hashmap.vala"
+  "${CMAKE_SOURCE_DIR}/gee/hashset.vala"
+  "${CMAKE_SOURCE_DIR}/gee/iterable.vala"
+  "${CMAKE_SOURCE_DIR}/gee/iterator.vala"
+  "${CMAKE_SOURCE_DIR}/gee/list.vala"
+  "${CMAKE_SOURCE_DIR}/gee/map.vala"
+  "${CMAKE_SOURCE_DIR}/gee/set.vala"
+  )

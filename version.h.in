@@ -1,0 +1,2 @@
+/* Automatically generated from version.h.in, doo not edit! */
+#define BUILD_VERSION "@VALA_VERSION@"

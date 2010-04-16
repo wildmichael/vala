@@ -1,0 +1,247 @@
+Vala Installation Instructions
+==============================
+Michael Wild <themiwi@users.sourceforge.net>
+:Author Initials: MW
+:version: 0.8.0
+v{version}, {localdate}
+http://live.gnome.org/Vala
+
+Prerequisites
+-------------
+Required
+~~~~~~~~
+* http://gtk.org[GLib] version 2.14.0 or newer (with development headers).
+* A ANSI-C (C89) compliant C-compiler, e.g. http://gcc.gnu.org[GCC].
+* http://cmake.org[CMake] version 2.8 or newer.
+
+Optional
+~~~~~~~~
+* A http://live.gnome.org/Vala[Vala] compiler version 0.7.0 or newer if you
+  want to compile a development version not containing the precompiled sources.
+* The lexical analyzer http://flex.sourceforge.net[flex] if you obtained a
+  development version of Vala not containing the precompiled sources and want
+  to build the tools 'vapigen' and 'vapicheck'.
+* The parser generator http://gnu.org/software/bison[Bison] if you obtained a
+  development version of Vala not containing the precompiled sources and want
+  to build the tools 'vapigen' and 'vapicheck'.
+* To build the HTML documentation from the XML sources,
+  http://xmlsoft.org/XSLT/xsltproc2.html[xsltproc] is required. Released
+  versions of Vala already contain the processed documentation, and 'xsltproc'
+  is not required.
+* http://dbus.freedesktop.org[DBus] with the 'GLib' bindings is required to
+  build the test-suite.
+* To perform some maintenance tasks, you need to have the
+  http://perl.org[perl] interpreter installed.
+
+Building and Installing Vala on UNIX-like systems (including Mac OS X)
+----------------------------------------------------------------------
+- Download the Vala sources from the
+  http://git.wildcodes.com/cgit.git/vala.git[Git repository] to somewhere
+  convenient. For the further instructions we will use
+  +$HOME/Source/vala-{version}+ as the directory containing the sources. You
+  can use both, a checkout from the repository or a current snapshot.
+- Create a build tree and _cd_ into it:
++
+---------------
+$ mkdir $HOME/Source/vala-build
+$ cd $HOME/Source/vala-build
+---------------
+- Start the CMake-configuration:
++
+---------------
+$ ccmake $HOME/Source/vala-{version}
+---------------
+- Press the +c+ key to initialize the cache.
+- Use the arrow keys to navigate up and down and press +enter+ to edit a field.
+  To commit the change, press +enter+ again, or +ESC+ to abandon the change.
+  *ON/OFF* fields are toggled by pressing +enter+. Advanced options can be
+  displayed by hitting the +t+ key. Important settings are:
+  +CMAKE_INSTALL_PREFIX+::
+    The install path prefix, prepended to relative installation directories.
+  +CMAKE_BUILD_TYPE+::
+    The build type. Available options are '<unset>' ( i.e. not set) for a build
+    without special compiler flags, 'Release' for optimized builds, 'Debug' if
+    you need to debug Vala, 'RelWithDebInfo' for optimized builds with debug
+    information and 'MinSizeRel' for size-optimized builds.
+  +VALA_ENABLE_VAPIGEN+::
+    Also build and install 'vapigen' and 'vapicheck'.
+  +
+  Refer to the <<config-reference, Build Configuration Reference>> for all the
+  available options.
+- Keep pressing +c+ until _ccmake_ displays "++Press [g] to generate and
+  exit++" in the legend at the bottom of the interface.
+- Press +g+ to generate the Makefiles and exit _ccmake_.
+- Start the native build tool. E.g. if using the 'GNU Makefile' generator, type
++
+---------------
+$ make
+---------------
++
+If you don't know how to start the native build tool, you can also use
++
+---------------
+$ cmake --build .
+---------------
+- If the build finished without errors, install Vala by running the +install+
+  target. Again, you can do so by typing (depending on the installation paths
+  you may need root/Administrator privileges to do this):
++
+---------------
+$ cmake --build . --target install
+---------------
+
+Building and Installing Vala on Windows
+---------------------------------------
+There are many options for compiling Vala on Windows. If you want to use
+http://cygwin.org[Cygwin] or http://mingw.org[MinGW] to compile Vala, you can
+follow the instruction for <<build-unix, UNIX-like>> systems. If you want to
+build using http://microsoft.com/visualstudio[Microsoft Visual Studio] (or some
+other IDE supported by CMake) instead, use below instructions.
+
+- Download the Vala sources from the
+  http://git.wildcodes.com/cgit.git/vala.git[Git repository] to somewhere
+  convenient. For the further instructions we will use
+  +%HOMEPATH%\Source\vala-{version}+ as the folder containing the sources. You
+  can use both, a checkout from the repository or a current snapshot.
+- Create the folder which is different from the source folder. We will use
+  +%HOMEPATH%\Source\vala-build+ in the following.
+- Start the program 'CMake GUI' from the 'Start' menu.
+- Use the 'Browse Source...' button to locate the source-folder
+  (+%HOMEPATH%\Source\vala-{version}+) or enter it in the text field to its
+  left.
+- Use the 'Browse Build...' button to locate the build-folder
+  (+%HOMEPATH%\Source\vala-build+) or enter it in the text field to its left.
+- Press the 'Configure' button to initialize the cache. From the dialog that pops
+  up, select the appropriate generator and options.
+- Edit the build options to suit your needs. Some important settings are:
+  +CMAKE_INSTALL_PREFIX+::
+    The install path prefix, prepended to relative installation directories.
+  +CMAKE_BUILD_TYPE+::
+    The build type. Available options are '<unset>' ( i.e. not set) for a build
+    without special compiler flags, 'Release' for optimized builds, 'Debug' if
+    you need to debug Vala, 'RelWithDebInfo' for optimized builds with debug
+    information and 'MinSizeRel' for size-optimized builds.
+  +VALA_ENABLE_VAPIGEN+::
+    Also build and install 'vapigen' and 'vapicheck'.
+  +
+  Refer to the <<config-reference, Build Configuration Reference>> for all the
+  available options.
+- Keep pressing the 'Configure' button until all of the red entries are gone
+  and the button labelled 'Generate' is enabled.
+- Press the 'Generate' button to generate the build system.
+- Navigate to the build directory (+%HOMEPATH%\Source\vala-build+) and open the
+  generated project file with your IDE (e.g. Visual Studio).
+- Run the target +ALL_BUILD+ to build Vala.
+- If the build finished without errors, install Vala by running the +install+
+  target.
+
+[[config-reference]]
+Build Configuration Reference
+-----------------------------
+The following lists variables that affect how Vala is built and where it is
+installed. Depending on these choices, CMake will try to locate the
+dependencies (libraries, include-directories and executables) and generate
+corresponding cache entries that can be edited if CMake failed to find a
+component or one whishes to specify an alternative. Also, some of the below
+options only become available if either some prerequisits are found on the
+system or some other feature is enabled.
+[glossary]
++CMAKE_BUILD_TYPE+::
+  One of '<empty>', 'Debug', 'Release', 'RelWithDebInfo' and 'MinSizeRel'.
+  Refer to the CMake documentation for more detail. In order to do coverage
+  analysis, use the option 'Coverage'. The latter is only available if
+  compiling with the http://gcc.gnu.org[GCC] compiler.
++CMAKE_INSTALL_PREFIX+::
+  Installation prefix which is prepended to relative (i.e. not absolute)
+  installation directories.
++VALA_BIN_DIR+::
+  Installation directory for executables and other runtime components (DLLs on
+  Windows).
++VALA_LIB_DIR+::
+  Installation directory for libraries (*not* DLLs on Windows).
++VALA_INC_DIR+::
+  Location to install development headers in.
++VALA_DATA_DIR+::
+  Directory to under which architecture-independent data files are to be
+  installed.
++VALA_MAN_DIR+::
+  Installation directory under which to install the Unix manual pages.
++VALA_ENABLE_VAPIGEN+::
+  Build and install the tools 'vapigen' and 'vapicheck'.
++VALA_USE_SYSTEM_COMPILER+::
+  If CMake was able to find another Vala compiler on your system you can use
+  it to compile Vala. If you obtained Vala from the Git repository or use a
+  snapshot that does not contain the precompiled sources, you *must* have a
+  Vala compiler installed.
++VALA_USE_XSLTPROC+::
+  If CMake was able to find 'xsltproc' on your system you can use it to compile
+  the documentation. If you obtained Vala from the Git repository or use a
+  snapshot that does not contain the precompiled sources, you *must* have
+  'xsltproc' installed in order for the documentation to be built and
+  installed.
++VALA_USE_FLEX_AND_BISON+::
+  If CMake was able to find 'flex' and 'Bison' on your system you can use them
+  to compile the lexer and parser for the tools 'vapigen' and 'vapicheck' if
+  you enabled +VALA_ENABLE_VAPIGEN+. If you obtained Vala from the Git
+  repository or use a snapshot that does not contain the precompiled sources,
+  you *must* have 'flex' and 'bison' installed in order to build 'vapigen' and
+  'vapicheck'.
++VALA_COMPILE_FLAGS+:;
+  Flags used by the Vala compiler.
++VALA_COMPILE_FLAGS_<CONFIG>+::
+  Flags used by the Vala compiler for the build type '<CONFIG>'. These are
+  appended to +VALA_COMPILE_FLAGS+.
++VALA_ENABLE_RECOMPILE+::
+  If enabled the, compiler is either bootstrapped from the C sources or using
+  an external Vala compiler (+VALA_USE_SYSTEM_COMPILER+) which is then used to
+  recompile the final Vala compiler.
++VALA_ENABLE_TESTING+::
+  Build the unit-testing applications.
++VALA_ENABLE_MAINTAINER_MODE+::
+  Enable special targets useful for the maintenance Vala itself.
++
+[WARNING]
+__Only enable this setting if you know what you are doing.__ The targets
++gen-ChangeLog+, +gen-version+ and +self-contained+ made available by this
+setting **modify the source tree**.
+
+[[special-targets]]
+Special Targets
+---------------
+[glossary]
++test+::
+  Run the unit tests. Requires +VALA_ENABLE_TESTING+ to be enabled.
++
+[IMPORTANT]
+Some of the tests require you to have a DBus daemon running in order for them
+to work. Currently the daemon is *not* started automatically.
+
++check+::
+  Configure, build, run unit tests and perform coverage analysis (requires to
+  be compiled for _gcov_, e.g. using the 'Coverage' build configuration). Only
+  available if +VALA_ENABLE_TESTING+ is enabled. Again, a DBus daemon must be
+  running for some of the tests to work.
+
++self-contained+::
+  Copy the generated files (C-sources, headers, '.vapi' files etc.) into the
+  source tree. The resulting source tree is self-contained and can be
+  bootstrapped without an external Vala compiler. Only available if
+  +VALA_ENABLE_MAINTAINER_MODE+ is enabled.
+
++gen-ChangeLog+::
+  Automatically generate the 'ChangeLog' file from the 'git' revision log.
+  Requires the source tree to be a 'git' checkout and
+  +VALA_ENABLE_MAINTAINER_MODE+ to be enabled.
+
++gen-version+::
+  Create the '.version' file from the 'git' revision log. Requries the source
+  tree to be a 'git' checkout and +VALA_ENABLE_MAINTAINERMODE+ to be enabled.
+  The '.version' file is used by CMake to determine the package version if no
+  'git' information is available (e.g. in a source distribution).
+
+////////////////////////////////////////////////////////
+Process with: asciidoc
+
+Vim users, this is for you:
+vim: ft=asciidoc sw=2 expandtab fenc=utf-8
+////////////////////////////////////////////////////////

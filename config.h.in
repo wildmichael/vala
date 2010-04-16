@@ -1,0 +1,2 @@
+/* Automatically generated from config.h.in, do not edit! */
+#define PACKAGE_DATADIR "@VALA_DATA_DIR@/vala"

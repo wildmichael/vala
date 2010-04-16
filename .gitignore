@@ -10,7 +10,7 @@ Makefile
 .deps
 .libs
 
-config.*
+config.h
 aclocal.m4
 autom4te.cache
 ChangeLog
@@ -32,3 +32,4 @@ stamp-h1
 *.gcno
 coverage
 lcov.info
+*/generated/*

@@ -1,0 +1,13 @@
+# - Script to combine gee.vapi, ccode.vapi, vala.vapi and codegen.vapi into
+# vala-1.0.vapi
+set(vapi "@CMAKE_BINARY_DIR@/vapi/vala-1.0.vapi")
+file(REMOVE "${vapi}")
+foreach(f
+    gee/gee.vapi
+    ccode/ccode.vapi
+    vala/vala.vapi
+    codegen/codegen.vapi
+    )
+  file(READ "@CMAKE_BINARY_DIR@/${f}" data)
+  file(APPEND "${vapi}" "${data}")
+endforeach()

@@ -1,0 +1,17 @@
+# - script to generate the ChangeLog from the Git log
+execute_process(
+  COMMAND "@PERL_EXECUTABLE@"
+    "@CMAKE_SOURCE_DIR@/build-aux/gitlog-to-changelog"
+    --since "@VALA_CHANGELOG_START_DATE@"
+  WORKING_DIRECTORY "@CMAKE_SOURCE_DIR@"
+  OUTPUT_FILE "@CMAKE_SOURCE_DIR@/cl-t"
+  )
+
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" -E remove -f
+    "@CMAKE_SOURCE_DIR@/ChangeLog"
+  COMMAND "@CMAKE_COMMAND@" -E rename
+    "@CMAKE_SOURCE_DIR@/cl-t"
+    "@CMAKE_SOURCE_DIR@/ChangeLog"
+  WORKING_DIRECTORY "@CMAKE_SOURCE_DIR@"
+  )

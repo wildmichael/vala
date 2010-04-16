@@ -1,0 +1,234 @@
+# - Find and use the Vala compiler.
+#
+# This module locates the Vala compiler and related tools and provides a set of
+# functions which can be used to compile Vala (.vala) and Genie (.gs) sources.
+# Typical usage could be
+#  find_package(Vala REQUIRED)
+#  include("${VALA_USE_FILE}")
+#  include_directories(${VALA_INCLUDE_DIRS})
+#  vala_add_executable(myexe source.vala)
+# This first line finds the Vala compiler installation and the second line
+# includes utility functions. The last line creates the executable myexe from
+# source.vala. Similarly, the function vala_add_library is available to create
+# libraries. For more sophisticated needs the function vala_precompile
+# generates C sources and headers from a given list of Vala and Genie sources
+# which then can be further processed using other CMake facilities. If you do
+# so, please note that you should use vala_add_dependencies instead of the
+# plain add_dependencies to create the dependencies in order for the
+# specialized target properties and dependencies of the Vala targets to be
+# properly propagated.
+#
+#  vala_precompile(<target> <outvar> <source1> ... <sourceN>
+#                  [LIBRARY <libname>]
+#                  [PACKAGES <pkg> ...]
+#                  [VAPI_DIRS <vapidir> ...]
+#                  [CUSTOM_VAPIS <vapifile> ...]
+#                  [GENERATE_VAPI <vapifile>]
+#                  [GENERATE_INTERNAL_VAPI <vapifile>]
+#                  [GENERATE_HEADER <hfile>]
+#                  [GENERATE_INTERNAL_HEADER <hfile>]
+#                  [BASE_DIR <basedir>]
+#                  [COMPILE_FLAGS <option> ...]
+#                  [OUTPUT_DIR <outputdir>] [COMMENT <string>])
+#
+# Adds a custom target <target> to precompile the given Vala and Genie sources
+# <source1> ... <sourceN> using the executable named by the VALA_COMPILER
+# variable (i.e. valac). The resulting C source and header files are listed in
+# the <outvar> variable and can be further processed using e.g. add_library or
+# add_executable. The option LIBRARY can be used to signal that the listed
+# sources will be compiled into a library and that the Vala compiler should
+# generate an interface file <libname>.vapi in the output directory (i.e. this
+# option passes the "--library=<libname>" flag to the Vala compiler). The
+# strings following PACKAGES are a list of either package names to be passed to
+# the Vala compiler using the "--pkg=<pkg>" option or CMake target names. In
+# the latter case, the target must have the property VAPI_FILES set to the path
+# to its .vapi file and all CUSTOM_VAPIS it depends on (the functions provided
+# in this module do this automatically). A dependency of <target> on the target
+# providing the .vapi file will be automatically added. The PACKAGES property
+# is inherited by other Vala targets that use <target> in their own PACKAGES
+# list. To search additional directories for .vapi files, list them after
+# VAPI_DIRS. If not specified, the variable VALA_VAPI_DIRS is used if defined.
+# To include a custom list of .vapi files in the compilation, list them after
+# CUSTOM_VAPIS. This can be useful to include freshly created vala libraries
+# without having to install them in the system. If LIBRARY is used and you want
+# to change the name of the generated .vapi file or its output path (or you
+# want to generate a .vapi file for a target without LIBRARY), you can use
+# GENERATE_VAPI <vapifile>. If <vapifile> is not an absolute path, it is
+# relative to the output directory (see below). An internal .vapi file can be
+# created by passing GENERATE_INTERNAL_VAPI <vapifile>. To generate a public
+# C-header <hfile>, use GENERATE_HEADER <hfile>. For an internal header file,
+# use GENERATE_INTERNAL_HEADER <hfile> instead. If the names are not absolute
+# paths, the output will be placed in the output directory. The
+# BASE_DIR <basedir> option allows to set a different base source directory
+# than ${CMAKE_CURRENT_SOURCE_DIR}. If the path is not absolute, it will be
+# prefixed by ${CMAKE_CURRENT_SOURCE_DIR}. COMPILE_FLAGS can be used to pass
+# additional options to the Vala compiler (e.g. --thread for multi-threading
+# support). This option is initialized by the variable VALA_COMPILE_FLAGS and
+# VALA_COMPILE_FLAGS_<CONFIG> and the new flags are appended to it. If you want
+# to use a different output directory for the generated files than
+# CMAKE_CURRENT_BINARY_DIR, specify OUTPUT_DIR <outdir>. If the path is not
+# absolute, it will be prefixed by CMAKE_CURRENT_BINARY_DIR. By default the
+# generated custom command will display "Precompiling Vala target <target>". To
+# change this, pass the COMMENT <string> option.
+#
+#  vala_add_executable(<name> <source1> ... <sourceN>
+#                      [PACKAGES <pkg> ...]
+#                      [VAPI_DIRS <vapidir> ...]
+#                      [CUSTOM_VAPIS <vapifile> ...]
+#                      [BASE_DIR <basedir>]
+#                      [COMPILE_FLAGS <flag> ...]
+#                      [OUTPUT_DIR <outputdir>]
+#                      [COMMENT <string>])
+#
+# Adds an executable <name>, just like add_executable does. All the options
+# have the same meaning as for vala_precompile. The generated C sources are
+# available through the VALA_C_SOURCES target property. The target is linked
+# against the libraries listed in VALA_LIBRARIES (usually these are the
+# GLIB2_LIBRARIES).
+#
+#  vala_add_library(<name> [STATIC | SHARED | MODULE]
+#                   <source1> ... <sourceN>
+#                   [LIBRARY <libname>]
+#                   [PACKAGES <pkg> ...] [VAPI_DIRS <vapidir> ...]
+#                   [CUSTOM_VAPIS <vapifile> ...]
+#                   [GENERATE_VAPI <vapifile>]
+#                   [GENERATE_INTERNAL_VAPI <vapifile>]
+#                   [GENERATE_HEADER <hfile>]
+#                   [GENERATE_INTERNAL_HEADER <hfile>]
+#                   [BASE_DIR <basedir>]
+#                   [COMPILE_FLAGS <option> ...]
+#                   [OUTPUT_DIR <outputdir>] [COMMENT <string>])
+#
+# Adds a library <name>, just like add_library does. All the options have the
+# same meaning as for vala_precompile. <name> will also be passed to the
+# LIBRARY option of vala_precompile unless overriden by LIBRARY. As for
+# vala_add_executable, the generated C sources can be retrieved from the
+# VALA_C_SOURCES target property. The target is linked against the libraries
+# listed in VALA_LIBRARIES (usually these are the GLIB2_LIBRARIES).
+#
+#  vala_add_dependencies(<target> <depend1> [<depend2> ...])
+#
+# Make <target> depend on the top-level targets <depend1> ... in the same way
+# the standard add_dependencies does. If any of the dependencies is a Vala
+# target, <target> will inherit the properties VAPI_FILES and
+# VALA_PACKAGE_DEPENDENCIES which are used to implement transitive Vala
+# dependencies. This is useful to e.g. make a target created by add_library to
+# depend on the target created by vala_precompile and make the library target a
+# viable target for the PACKAGES option of the Vala functions.
+#
+# The module sets the following variables:
+#  VALA_FOUND           TRUE if the Vala compiler has been found
+#  VALA_USE_FILE        The path of the file that must be included in the
+#                       CMakeLists.txt in order to use the above functions.
+#  VALA_INCLUDE_DIRS    Include-directories required to compile
+#                       generated C code (GLib and GObject).
+#  VALA_LIBRARIES       Libraries to link your Vala targets
+#                       against (GLib and GObject).
+#  VALA_VAPI_DIR        Directory containing the installed vapi files.
+#  VALA_VAPI_DIRS       VALA_VAPI_DIR is appended to this list.
+#  VALA_HAVE_VAPIGEN    TRUE if Vala has been compiled with
+#                       VALA_ENABLE_VAPIGEN.
+#  VALA_COMPILER        The valac compiler executable.
+#  VALA_VAPIGEN_EXECUTABLE         The vapigen executable.
+#  VALA_VAPICHECK_EXECUTABLE       The vapicheck executable.
+#  VALA_GEN_INTROSPECT_EXECUTABLE  The vala-gen-introspect wrapper
+#                       shell script (requires a CMake generator
+#                       that uses a sensible shell interpreter to
+#                       run it, i.e. Bourne-shell compatible).
+#  VALA_VERSION         Version of the Vala compiler.
+#  VALA_DEV_LIBRARIES   The libraries to link against if you want
+#                       to use the Vala compiler infrastructure.
+#                       Normal libraries and executables DO NOT
+#                       need to link against these libraries!
+#  VALA_DEV_INCLUDE_DIR Include directory if you want to use the
+#                       Vala compiler infrastructure. As for
+#                       VALA_DEV_LIBRARIES, most projects won't
+#                       need to use this variable.
+#  VALA_CMAKE_DIR       Directory containing CMake modules provided by Vala.
+#
+# Properties on Vala targets:
+#  PUBLIC_VAPI_FILE     If a Vala target is created with GENERATE_VAPI or the
+#                       LIBRARY option, the location of the generated public
+#                       .vapi file is stored in this property.
+#  INTERNAL_VAPI_FILE   If a Vala target is created with GENERATE_INTERNAL_VAPI
+#                       option, the location of the generated internal .vapi
+#                       file is stored in this property.
+#  VAPI_FILES           Names the .vapi file describing the C GLib/GObject
+#                       interface defined by a Vala library in the Vala
+#                       language such that it can be used by other Vala code
+#                       and all other .vapi files this library depends on.
+#  VALA_PACKAGE_DEPENDENCIES Target names of Vala libraries that have been
+#                       passed using the PACKAGES option of vala_precompile,
+#                       vala_add_executable or vala_add_library on which this
+#                       target depends. This property is inherited by other
+#                       targets that list this target in their PACKAGES option.
+#  VALA_C_SOURCES       The functions vala_add_executable and vala_add_library
+#                       store in this property the paths of the generated
+#                       C-sources as returned by vala_precompile.
+
+cmake_minimum_required(VERSION @VALA_MINIMUM_CMAKE_VERSION@ FATAL_ERROR)
+
+# used here and in USE file
+set(VALA_CMAKE_DIR "@CONFIG_CMAKE_DIR@")
+
+# vala compiler version (set in ValaConfigVersion.cmake)
+set(VALA_VERSION ${Vala_VERSION})
+
+# Our executable dependencies
+if(NOT TARGET Vala:valac)
+  include("${VALA_CMAKE_DIR}/ValaExports.cmake")
+  # set vala specific properties
+  set_target_properties(Vala:vala PROPERTIES
+    PUBLIC_VAPI_FILE "@CONFIG_VAPI_DIR@/vala-1.0.vapi"
+    INTERNAL_VAPI_FILE ""
+    VAPI_FILES "@CONFIG_VAPI_DIR@/vala-1.0.vapi"
+    VALA_PACKAGE_DEPENDENCIES "gobject-2.0"
+    )
+  if(VALA_HAVE_VAPIGEN)
+    # can't EXPORT shell scripts...
+    add_executable(Vala:vala-gen-introspect IMPORTED)
+    set_target_properties(Vala:vala-gen-introspect PROPERTIES
+      IMPORTED_LOCATION "@CONFIG_VALA_GEN_INTROSPECT_LOCATION@")
+  endif()
+endif()
+
+set(VALA_HAVE_VAPIGEN @VALA_ENABLE_VAPIGEN@)
+# Set variable to refer to the imported executables
+# (can't use the target name for the compiler, because of the driver scripts)
+get_target_property(VALA_COMPILER Vala:valac LOCATION)
+set(VALA_VAPI_DIR "@CONFIG_VAPI_DIR@")
+set(VALA_DEV_LIBRARIES Vala:vala)
+set(VALA_DEV_INCLUDE_DIR "@CONFIG_INC_DIR@")
+if(VALA_HAVE_VAPIGEN)
+  set(VALA_VAPIGEN_EXECUTABLE Vala:vapigen)
+  set(GEN_INTROSPECT_EXECUTABLE Vala:vala-gen-introspect)
+endif()
+
+# USE file
+set(VALA_USE_FILE "${VALA_CMAKE_DIR}/UseVala.cmake")
+
+# compiler flags
+set(VALA_COMPILE_FLAGS "" CACHE STRING "Flags used by the Vala compiler")
+set(VALA_COMPILE_FLAGS_DEBUG "-g" CACHE STRING
+  "Flags used by the Vala compiler during debug builds")
+set(VALA_COMPILE_FLAGS_MINSIZEREL "" CACHE STRING
+  "Flags used by the Vala compiler during release minsize builds")
+set(VALA_COMPILE_FLAGS_RELEASE "" CACHE STRING
+  "Flags used by the Vala compiler during release builds")
+set(VALA_COMPILE_FLAGS_RELWITHDEBINFO "-g" CACHE STRING
+  "Flags used by the Vala compiler during release with Debug Info builds")
+mark_as_advanced(VALA_COMPILE_FLAGS VALA_COMPILE_FLAGS_DEBUG
+  VALA_COMPILE_FLAGS_MINSIZEREL VALA_COMPILE_FLAGS_RELEASE
+  VALA_COMPILE_FLAGS_RELWITHDEBINFO)
+
+# find glib2 (don't modify CMAKE_MODULE_PATH)
+set(_VALA_CMAKE_MODULE_PATH_BAK "${CMAKE_MODULE_PATH}")
+list(INSERT CMAKE_MODULE_PATH 0 "${VALA_CMAKE_DIR}")
+find_package(ValaGLib2 "@VALA_MIMIMUM_REQUIRED_GLIB_VERSION@" REQUIRED)
+set(CMAKE_MODULE_PATH "${_VALA_CMAKE_MODULE_PATH_BAK}")
+unset(_VALA_CMAKE_MODULE_PATH_BAK)
+
+set(VALA_INCLUDE_DIRS "${GLIB2_INCLUDE_DIRS}")
+set(VALA_LIBRARIES "${GLIB2_LIBRARIES}")
+list(APPEND VALA_VAPI_DIRS "${VALA_VAPI_DIR}")
+set(VALA_FOUND TRUE)
